@@ -45,10 +45,10 @@ QUERY="$1"
 SEASON="$2"
 EPISODE="$3"
 ENCODED_QUERY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$QUERY'''))")
-echo "$ENCODED_QUERY"
 API_URL="https://api.imdbapi.dev/advancedSearch/titles?query=${ENCODED_QUERY}&types=TV_SERIES"
-echo "$API_URL"
 # Fetch and extract the first ID
+
+echo "Fetching Available Series..."
 
 mapfile -t IDS < <(curl -s "$API_URL" | jq -r '.titles[].id')
 mapfile -t TITLES < <(curl -s "$API_URL" | jq -r '.titles[].primaryTitle')
@@ -76,7 +76,6 @@ fi
 
 # Construct URL
 URL="https://111movies.com/tv/${SELECTED_ID}/${SEASON}/${EPISODE}"
-echo "Constructed URL: $URL"
 
 # Activate venv
 source venv/bin/activate
@@ -92,7 +91,7 @@ fi
 
 # Run playwright install to install browsers if not done before
 if [ ! -d "venv/.playwright" ]; then
-  echo "Installing Playwright browsers..."
+  echo "Installing Dependencies..."
   playwright install || {
     echo ""
     echo "Error: Playwright browser installation failed."
@@ -107,8 +106,11 @@ python3 m3u8-url-fetcher.py "$URL"
 
 m3u8_URL=$(< /tmp/m3u8.txt)
 
+echo "Starting Download..."
+
 output_path="$HOME/Downloads/${SELECTED_TITLE} - S${SEASON}E${EPISODE}.mp4"
 ffmpeg -i "$m3u8_URL" -c copy "$output_path"
+
  
 # Deactivate venv (optional)
 deactivate

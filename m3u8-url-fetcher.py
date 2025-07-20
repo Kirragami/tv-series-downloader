@@ -37,15 +37,13 @@ def find_requests(url):
         page.on("requestfinished", on_response)
         page.on("requestfailed", on_response)
 
-        print(f"🌐 Navigating to: {url}")
+        print(f"Fetching video URL from Server")
         try:
             page.goto(url)
         except Exception as e:
             print(f"⚠️ Page load failed: {e}")
             browser.close()
             sys.exit(1)
-
-        print("⌛ Waiting for network to become idle...")
         timeout = 15
         idle_time = 2
         start = time.time()
@@ -62,7 +60,7 @@ def find_requests(url):
         browser.close()
 
         if found_url:
-            print("✅ Done. Matching request captured.")
+            print("Got video URL...")
             sys.exit(0)
         else:
             print("❌ No matching .m3u8 request found.")
