@@ -48,21 +48,6 @@ ENCODED_QUERY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$QU
 API_URL="https://api.imdbapi.dev/advancedSearch/titles?query=${ENCODED_QUERY}&types=TV_SERIES"
 # Fetch and extract the first ID
 
-echo "Fetching Available Series..."
-
-mapfile -t IDS < <(curl -s "$API_URL" | jq -r '.titles[].id')
-mapfile -t TITLES < <(curl -s "$API_URL" | jq -r '.titles[].primaryTitle')
-
-echo "Select a title:"
-for i in "${!TITLES[@]}"; do
-  echo "$((i+1)). ${TITLES[i]}"
-done
-
-read -p "Enter a number: " choice
-
-SELECTED_TITLE="${TITLES[choice-1]}"
-SELECTED_ID="${IDS[choice-1]}"
-
 # Validate input
 if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#TITLES[@]} )); then
   echo "Invalid choice"
@@ -100,6 +85,11 @@ if [ ! -d "venv/.playwright" ]; then
     exit 1
   }
 fi
+
+echo "Fetching Available Series..."
+
+mapfile -t IDS < <(curl -s "$API_URL" | jq -r '.titles[].id')
+mapfile -t TITLES < <(curl -s "$API_URL" | jq -r '.titles[].primaryTitle')
 
 # Run your Python script with all passed arguments
 python3 m3u8-url-fetcher.py "$URL"
