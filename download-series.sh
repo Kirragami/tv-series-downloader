@@ -35,33 +35,6 @@ if [ ! -f "venv/bin/activate" ]; then
   exit 1
 fi
 
-# Input: Search query
-if [ -z "$1" ]; then
-  echo "Usage: ./run.sh \"search query\""
-  exit 1
-fi
-
-QUERY="$1"
-SEASON="$2"
-EPISODE="$3"
-ENCODED_QUERY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$QUERY'''))")
-API_URL="https://api.imdbapi.dev/advancedSearch/titles?query=${ENCODED_QUERY}&types=TV_SERIES"
-# Fetch and extract the first ID
-
-# Validate input
-if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#TITLES[@]} )); then
-  echo "Invalid choice"
-  exit 1
-fi
-
-if [ "$IDS" == "null" ] || [ -z "$IDS" ]; then
-  echo "No ID found for query: $QUERY"
-  exit 1
-fi
-
-# Construct URL
-URL="https://111movies.com/tv/${SELECTED_ID}/${SEASON}/${EPISODE}"
-
 # Activate venv
 source venv/bin/activate
 
@@ -86,10 +59,47 @@ if [ ! -d "venv/.playwright" ]; then
   }
 fi
 
+# Input: Search query
+if [ -z "$1" ]; then
+  echo "Usage: ./run.sh \"search query\""
+  exit 1
+fi
+
+QUERY="$1"
+SEASON="$2"
+EPISODE="$3"
+ENCODED_QUERY=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$QUERY'''))")
+API_URL="https://api.imdbapi.dev/advancedSearch/titles?query=${ENCODED_QUERY}&types=TV_SERIES"
+# Fetch and extract the first ID
+
 echo "Fetching Available Series..."
 
 mapfile -t IDS < <(curl -s "$API_URL" | jq -r '.titles[].id')
 mapfile -t TITLES < <(curl -s "$API_URL" | jq -r '.titles[].primaryTitle')
+
+echo "Select a title:"
+for i in "${!TITLES[@]}"; do
+  echo "$((i+1)). ${TITLES[i]}"
+done
+
+read -p "Enter a number: " choice
+
+SELECTED_TITLE="${TITLES[choice-1]}"
+SELECTED_ID="${IDS[choice-1]}"
+
+# Validate input
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#TITLES[@]} )); then
+  echo "Invalid choice"
+  exit 1
+fi
+
+if [ "$IDS" == "null" ] || [ -z "$IDS" ]; then
+  echo "No ID found for query: $QUERY"
+  exit 1
+fi
+
+# Construct URL
+URL="https://111movies.com/tv/${SELECTED_ID}/${SEASON}/${EPISODE}"
 
 # Run your Python script with all passed arguments
 python3 m3u8-url-fetcher.py "$URL"
