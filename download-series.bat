@@ -12,10 +12,10 @@ if not exist "%FFMPEG_EXE%" (
 
   if not exist "%FFMPEG_DIR%" mkdir "%FFMPEG_DIR%"
 
-  powershell -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%CD%\%FFMPEG_ZIP%'"
+  powershell -Command "Invoke-WebRequest -Uri \"%FFMPEG_URL%\" -OutFile \"%CD%\%FFMPEG_ZIP%\""
 
   echo Extracting ffmpeg...
-  powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory('%CD%\%FFMPEG_ZIP%', '%CD%\%FFMPEG_DIR%')"
+  powershell -Command "Add-Type -AssemblyName System.IO.Compression.FileSystem; [System.IO.Compression.ZipFile]::ExtractToDirectory(\"%CD%\%FFMPEG_ZIP%\", \"%CD%\%FFMPEG_DIR%\")"
 
   echo Searching for ffmpeg.exe inside extracted folder...
   for /f "delims=" %%f in ('dir /b /s "%FFMPEG_DIR%\ffmpeg.exe"') do (
