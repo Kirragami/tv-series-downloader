@@ -1,4 +1,4 @@
-@echo off
+@echo on
 setlocal enabledelayedexpansion
 
 :: Function to check if a command exists
@@ -6,69 +6,12 @@ setlocal enabledelayedexpansion
 :: Returns ERRORLEVEL 0 if exists, 1 if not
 
 :: Check if ffmpeg.exe exists in project directory
-if not exist "ffmpeg.exe" (
-    echo ffmpeg.exe not found in project directory.
-    echo Downloading ffmpeg...
-
-    set "FFMPEG_ZIP=ffmpeg-release-essentials.zip"
-    set "FFMPEG_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
-
-    :: Download ffmpeg zip
-    if exist "%FFMPEG_ZIP%" del "%FFMPEG_ZIP%"
-    curl -L -o "%FFMPEG_ZIP%" "%FFMPEG_URL%"
-    if errorlevel 1 (
-        echo Failed to download ffmpeg.
-        exit /b 1
-    )
-
-    :: Extract zip (requires PowerShell)
-    echo Extracting ffmpeg...
-    powershell -Command "Expand-Archive -Force '%FFMPEG_ZIP%' -DestinationPath ."
-
-    if errorlevel 1 (
-        echo Failed to extract ffmpeg.
-        exit /b 1
-    )
-
-    :: The extracted folder name might be like ffmpeg-*-essentials_build
-    for /d %%F in (ffmpeg-*-essentials_build) do set "FFMPEG_DIR=%%F"
-
-    if not defined FFMPEG_DIR (
-        echo Could not find extracted ffmpeg folder.
-        exit /b 1
-    )
-
-    :: Copy ffmpeg.exe to project root for easier access
-    copy "%FFMPEG_DIR%\bin\ffmpeg.exe" . >nul
-    if errorlevel 1 (
-        echo Failed to copy ffmpeg.exe.
-        exit /b 1
-    )
-
-    :: Cleanup
-    del "%FFMPEG_ZIP%"
-    rmdir /s /q "%FFMPEG_DIR%"
-) else (
-    echo Found ffmpeg.exe in project directory.
-)
 
 :: Use ffmpeg.exe from project directory
-set "FFMPEG_EXE=%CD%\ffmpeg.exe"
+set "FFMPEG_EXE=%CD%\ffmpeg\bin\ffmpeg.exe"
 
-:command_exists
-where %1 >nul 2>&1
-if %errorlevel%==0 (
-  exit /b 0
-) else (
-  exit /b 1
-)
 
 :: Check python3 existence
-call :command_exists python
-if errorlevel 1 (
-  echo Error: python3 (python) is not installed. Please install it first.
-  exit /b 1
-)
 
 :: Check if python venv module exists by trying to create a temp venv
 set "tmp_venv_dir=%TEMP%\tmp_venv_check"
