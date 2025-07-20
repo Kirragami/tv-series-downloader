@@ -33,6 +33,7 @@ if not exist "%FFMPEG_EXE%" (
 :: Now you can run ffmpeg with:
 "%FFMPEG_EXE%" -i "%m3u8_URL%" -c copy "%output_path%"
 
+
 :: Check if Python is installed
 where python >nul 2>&1
 if errorlevel 1 (
@@ -77,6 +78,7 @@ set "API_URL=https://api.imdbapi.dev/advancedSearch/titles?query=%ENCODED_QUERY%
 echo Fetching Available Series...
 
 :: Fetch IDs and Titles from API using PowerShell Invoke-RestMethod and parsing JSON
+set idx=0
 for /f "usebackq tokens=*" %%i in (`powershell -NoProfile -Command ^
   "Invoke-RestMethod '%API_URL%' | Select-Object -ExpandProperty titles | ForEach-Object { $_.id }"`) do (
   set /a idx+=1
@@ -160,7 +162,8 @@ if not exist "venv\.playwright" (
 python m3u8-url-fetcher.py "%URL%"
 
 :: Read m3u8 URL from temp file
-set /p m3u8_URL=<C:\Windows\Temp\m3u8.txt
+set /p m3u8_URL=<%TEMP%\m3u8.txt
+
 if "%m3u8_URL%"=="" (
   echo ERROR: Failed to read m3u8 URL from temp file.
   exit /b 1
@@ -173,7 +176,7 @@ set "output_path=%USERPROFILE%\Downloads\%SELECTED_TITLE% - S%SEASON%E%EPISODE%.
 echo Saving video to: "%output_path%"
 
 :: Run ffmpeg (assumes ffmpeg is in PATH)
-ffmpeg -i "%m3u8_URL%" -c copy "%output_path%"
+"%FFMPEG_EXE%" -i "%m3u8_URL%" -c copy "%output_path%"
 
 :: Deactivate venv (optional)
 endlocal
